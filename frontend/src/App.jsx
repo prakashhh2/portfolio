@@ -3,7 +3,9 @@ import Navbar from './components/Navbar.jsx'
 import Body from './components/Body.jsx'
 import Footer from './components/Footer.jsx'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Production uses the same-origin /api rewrite; local development can still
+// point directly at the FastAPI server or override it with VITE_API_URL.
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '')
 
 const fallbackProfile = {
   name: 'Prakash Kusari',
