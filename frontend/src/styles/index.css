@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+
+/* Theme colours live in CSS variables so `theme <name>` is just a data attribute swap. */
+@theme inline {
+  --color-bg: var(--term-bg);
+  --color-fg: var(--term-fg);
+  --color-sec: var(--term-sec);
+  --color-hi: var(--term-hi);
+  --color-dim: var(--term-dim);
+  --font-term: 'VT323', ui-monospace, monospace;
+}
+
+:root,
+[data-theme='green-hc'] {
+  --term-bg: #000000;
+  --term-fg: #4dff7c;
+  --term-sec: #b4ffc9;
+  --term-hi: #ffffff;
+  --term-dim: #3fae63;
+  --glow: rgb(77 255 124 / 0.35);
+  --glass: 82%;
+}
+[data-theme='amber-hc'] {
+  --term-bg: #000000;
+  --term-fg: #ffbf1f;
+  --term-sec: #ffe2a3;
+  --term-hi: #ffffff;
+  --term-dim: #b88412;
+  --glow: rgb(255 191 31 / 0.3);
+  --glass: 82%;
+}
+[data-theme='green'] {
+  --term-bg: #050805;
+  --term-fg: #33ff66;
+  --term-sec: #1d9e49;
+  --term-hi: #a0ffb0;
+  --term-dim: #426b47;
+  --glow: rgb(51 255 102 / 0.45);
+  --glass: 35%;
+}
+[data-theme='amber'] {
+  --term-bg: #0a0700;
+  --term-fg: #ffb000;
+  --term-sec: #c78400;
+  --term-hi: #ffd98a;
+  --term-dim: #7a5a1a;
+  --glow: rgb(255 176 0 / 0.4);
+  --glass: 35%;
+}
+[data-theme='white'] {
+  --term-bg: #0b0b0b;
+  --term-fg: #e8e8e8;
+  --term-sec: #a8a8a8;
+  --term-hi: #ffffff;
+  --term-dim: #5f5f5f;
+  --glow: rgb(232 232 232 / 0.3);
+  --glass: 35%;
+}
+[data-theme='blue'] {
+  --term-bg: #020a1c;
+  --term-fg: #6cb6ff;
+  --term-sec: #4d93dc;
+  --term-hi: #d2e8ff;
+  --term-dim: #34507a;
+  --glow: rgb(108 182 255 / 0.4);
+  --glass: 35%;
+}
+[data-theme='contrast'] {
+  --term-bg: #000000;
+  --term-fg: #ffffff;
+  --term-sec: #ffff00;
+  --term-hi: #00ffff;
+  --term-dim: #c0c0c0;
+  --glow: transparent;
+  --glass: 90%;
+}
+
+html,
+body {
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-family: var(--font-term);
+  font-size: 22px;
+  line-height: 1.25;
+  font-variant-ligatures: none;
+}
+@media (max-width: 640px) {
+  html,
+  body {
+    font-size: 19px;
+  }
+}
+
+::selection {
+  background: var(--term-fg);
+  color: var(--term-bg);
+}
+
+/* The terminal input shows focus with its solid blinking cursor instead. */
+:focus-visible:not(#terminal-input) {
+  outline: 2px solid var(--term-hi);
+  outline-offset: 2px;
+}
+
+/* ---------- CRT screen ---------- */
+.crt {
+  position: relative;
+  overflow: hidden;
+  /* See-through glass: the dot background shows behind the text. */
+  background: color-mix(in srgb, var(--term-bg) var(--glass, 35%), transparent);
+}
+@media (min-width: 640px) {
+  .crt {
+    border-radius: 24px / 20px;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--term-fg) 35%, transparent),
+      0 0 30px 2px color-mix(in srgb, var(--term-fg) 12%, transparent);
+  }
+}
+.crt-content {
+  position: relative;
+  z-index: 1;
+}
+
+[data-crt='on'] .crt-content {
+  text-shadow:
+    0 0 1px var(--glow),
+    0 0 6px var(--glow);
+}
+.seven-seg {
+  filter: drop-shadow(0 0 4px var(--glow));
+}
+.glow-strong {
+  text-shadow: 0 0 8px var(--glow);
+}
+
+/* Scanlines + vignette sit above the text but never take clicks. */
+[data-crt='on'] .crt::before,
+[data-crt='on'] .crt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+[data-crt='on'] .crt::before {
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.18) 0 1px, transparent 1px 3px);
+}
+[data-crt='on'] .crt::after {
+  background: radial-gradient(ellipse at center, transparent 65%, rgb(0 0 0 / 0.35) 100%);
+  animation: flicker 8s infinite steps(1);
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  47% {
+    opacity: 0.92;
+  }
+  48% {
+    opacity: 1;
+  }
+}
+
+/* ---------- Cursor ---------- */
+.cursor {
+  background: var(--term-fg);
+  color: var(--term-bg);
+  animation: blink 1.06s steps(1) infinite;
+}
+.cursor-idle {
+  outline: 1px solid var(--term-sec);
+  outline-offset: -1px;
+}
+@keyframes blink {
+  50% {
+    background: transparent;
+    color: inherit;
+  }
+}
+
+/* Thin themed scrollbar */
+.crt * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--term-dim) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt::after,
+  .cursor {
+    animation: none !important;
+  }
+}
